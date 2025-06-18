@@ -13,15 +13,21 @@ app.use(express.json());
 app.use('/api/management', managementRoutes);
 
 // Sinkronisasi database dan jalankan server
-sequelize.sync({ force: true }).then(async () => { // jadikan callback ini async
+sequelize.sync({ force: true }).then(async () => {
   logger.info("Database synced successfully.");
 
   // Muat dan registrasikan semua route dinamis dari database
   await initializeDynamicRoutes(app); 
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
+    // Matikan timeout untuk koneksi yang masuk
+    server.keepAliveTimeout = 0; 
     logger.info(`Server is running on http://localhost:${PORT}`);
   });
+  
+  // Secara eksplisit menonaktifkan header x-powered-by
+  // dan juga bisa membantu dengan beberapa proxy
+  app.disable('x-powered-by');
 
 }).catch(err => {
   logger.error('Failed to sync database:', err);

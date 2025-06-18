@@ -6,7 +6,17 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.nodejs_20
+        # Tambahkan paket postgresql untuk menyediakan library client-nya (libpq)
+    pkgs.postgresql
+    pkgs.docker
+    pkgs.docker-compose
   ];
+
+  # Aktifkan layanan Docker
+  services.docker.enable = true;
+
+  # (Opsional) Secara otomatis menjalankan docker-compose saat workspace dimulai
+  #processes.docker-up.exec = "docker-compose up -d";
   # Sets environment variables in the workspace
   env = {};
   idx = {

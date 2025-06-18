@@ -3,21 +3,27 @@ const DatabaseConnection = require('./DatabaseConnection');
 const Controller = require('./Controller');
 const Route = require('./Route');
 
-// Mendefinisikan relasi antar model
-// Satu Route akan menjalankan satu Controller
+// --- Definisikan relasi dengan NAMA FOREIGN KEY YANG EKSPLISIT ---
+
+// Satu Route memiliki satu Controller
 Route.belongsTo(Controller, {
-  foreignKey: 'controllerId',
+  foreignKey: 'controllerId', // Gunakan 'c' kecil
   as: 'controller'
 });
-Controller.hasMany(Route, { as: 'routes' });
+Controller.hasMany(Route, { 
+  foreignKey: 'controllerId', // Gunakan 'c' kecil
+  as: 'routes' 
+});
 
-// Satu Controller menggunakan satu koneksi database
+// Satu Controller memiliki satu DatabaseConnection
 Controller.belongsTo(DatabaseConnection, {
-  foreignKey: 'dbConnectionId',
+  foreignKey: 'dbConnectionId', // Gunakan 'd' kecil
   as: 'databaseConnection'
 });
-DatabaseConnection.hasMany(Controller, { as: 'controllers' });
-
+DatabaseConnection.hasMany(Controller, { 
+  foreignKey: 'dbConnectionId', // Gunakan 'd' kecil
+  as: 'controllers' 
+});
 
 // Ekspor semua model dan instance sequelize
 module.exports = {

@@ -1,12 +1,16 @@
 const { Sequelize } = require('sequelize');
-const path = require('path');
 
-// Konfigurasi koneksi Sequelize menggunakan SQLite
-// Database akan disimpan dalam file 'db.sqlite' di root folder proyek.
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.join(__dirname, '..', 'db.sqlite'),
-  logging: false // Matikan logging query SQL di console
+// Konfigurasi ini harus cocok dengan yang ada di docker-compose.yml
+const DATABASE_NAME = 'apidashboard';
+const USERNAME = 'admin';
+const PASSWORD = 'admin';
+const HOST = 'localhost'; // Karena kita memetakan port, kita bisa pakai localhost
+const DIALECT = 'postgres';
+
+const sequelize = new Sequelize(DATABASE_NAME, USERNAME, PASSWORD, {
+  host: HOST,
+  dialect: DIALECT,
+  logging: false,
 });
 
 module.exports = sequelize;
