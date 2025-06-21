@@ -5,6 +5,7 @@ const logger = require('./utils/logger');
 const managementRoutes = require('./routes/managementRoutes');
 // Impor middleware baru kita
 const { dynamicRouteHandler } = require('./services/dynamicRouter');
+const { reloadRoutesCache } = require('./services/routeCache'); // Impor fungsi reload
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,10 +21,11 @@ app.use('/api/management', managementRoutes);
 app.use(dynamicRouteHandler);
 
 // Sinkronisasi database dan jalankan server
-sequelize.sync().then(() => { // Tidak perlu 'async' lagi di sini
+sequelize.sync().then(async () => { // Jadikan async lagi
   logger.info("Database synced successfully.");
   
-  // TIDAK ADA LAGI `initializeDynamicRoutes` DI SINI!
+  // Lakukan load awal ke cache saat server startup
+  await reloadRoutesCache();
 
   app.listen(PORT, () => {
     logger.info(`Server is running on http://localhost:${PORT}`);

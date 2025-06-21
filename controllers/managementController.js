@@ -1,5 +1,6 @@
 const { DatabaseConnection, Controller, Route, sequelize } = require('../models');
 const logger = require('../utils/logger');
+const { reloadRoutesCache } = require('../services/routeCache'); // Impor fungsi reload
 
 // === Database Connection Management ===
 exports.createDbConnection = async (req, res) => { /* ... (logika di sini) */ };
@@ -200,12 +201,14 @@ exports.createRoute = async (req, res) => {
       controllerId: controllerId // Ini adalah pemetaan yang paling penting
     });
 
-    res.status(201).json({
-      message: "Route created successfully.",
-      // Kita panggil .toJSON() untuk melihat hasil bersihnya
-      data: route.toJSON() 
-    });
-  } catch (error) {
+// TRIGGER PEMBARUAN CACHE!
+await reloadRoutesCache(); 
+
+res.status(201).json({
+  message: "Route created successfully and cache reloaded.",
+  data: route
+});
+} catch (error) {
     logger.error('Error creating route:', error);
     res.status(500).json({ error: error.message });
   }
@@ -241,8 +244,14 @@ exports.updateRoute = async (req, res) => {
     const [updated] = await Route.update(req.body, { where: { id: id } });
     if (updated) {
       const updatedRoute = await Route.findByPk(id);
-      res.status(200).json({ message: "Route updated successfully.", data: updatedRoute });
-    } else {
+      // TRIGGER PEMBARUAN CACHE!
+    await reloadRoutesCache(); 
+
+    res.status(200).json({
+      message: "Route updated successfully and cache reloaded.",
+      data: updatedRoute
+    });
+  } else {
       res.status(404).json({ message: "Route not found." });
     }
   } catch (error) {
@@ -254,7 +263,9 @@ exports.deleteRoute = async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await Route.destroy({ where: { id: id } });
-    if (deleted) res.status(200).json({ message: "Route deleted successfully." });
+    // TRIGGER PEMBARUAN CACHE!
+    await reloadRoutesCache(); 
+    if (deleted) res.status(200).json({ message: "Route deleted successfully and cache reloaded." });
     else res.status(404).json({ message: "Route not found." });
   } catch (error) {
     logger.error(`Error deleting route ${req.params.id}:`, error);
