@@ -172,7 +172,9 @@ exports.deleteController = async (req, res) => {
     const existingRoutes = await Route.count({ where: { controllerId: id } });
     if (existingRoutes > 0) return res.status(400).json({ message: `Cannot delete controller. It is currently used by ${existingRoutes} route(s).` });
     const deleted = await Controller.destroy({ where: { id: id } });
-    if (deleted) res.status(200).json({ message: "Controller deleted successfully." });
+        // TRIGGER PEMBARUAN CACHE!
+        await reloadRoutesCache();
+    if (deleted) res.status(200).json({ message: "Controller deleted successfully and reload cache." });
     else res.status(404).json({ message: "Controller not found." });
   } catch (error) {
     logger.error(`Error deleting controller ${req.params.id}:`, error);
